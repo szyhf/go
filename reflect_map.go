@@ -1,12 +1,14 @@
 package jsoniter
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/modern-go/reflect2"
 	"io"
 	"reflect"
 	"sort"
 	"unsafe"
+
+	"github.com/modern-go/reflect2"
 )
 
 func decoderOfMap(ctx *ctx, typ reflect2.Type) ValDecoder {
@@ -319,6 +321,10 @@ func (encoder *sortKeysMapEncoder) Encode(ptr unsafe.Pointer, stream *Stream) {
 		if i != 0 {
 			stream.WriteMore()
 		}
+		// add enough indention to every '\n'
+		ident := bytes.Repeat([]byte{' '}, stream.indention)
+		identd := bytes.Join([][]byte{[]byte{'\n'}, ident}, nil)
+		keyValue.keyValue = bytes.ReplaceAll(keyValue.keyValue, []byte{'\n'}, identd)
 		stream.Write(keyValue.keyValue)
 	}
 	if subStream.Error != nil && stream.Error == nil {
